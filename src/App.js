@@ -1,22 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "./services/api";
 
-import Header from "./Header";
+import "./global.css";
+import "./App.css";
+import "./Sidebar.css";
+import "./Main.css";
+
+import DevForm from "./components/DevForm";
+import DevItem from "./components/DevItem";
 
 function App() {
-  const [counter, setCounter] = useState(0);
+  const [devs, setDevs] = useState([]);
 
-  const handleIncrement = () => {
-    setCounter(counter + 1);
+  useEffect(() => {
+    const loadDevs = async () => {
+      const response = await api.get("/devs");
+
+      setDevs(response.data);
+    };
+
+    loadDevs();
+  }, []);
+
+  const handleAddDev = async data => {
+    const response = await api.post("/devs", data);
+
+    setDevs([...devs, response.data]);
   };
 
   return (
-    <>
-      <Header title="My title 1" />
-      <div>Counter: {counter}</div>
-      <buton onClick={handleIncrement}>Increment</buton>
-      <Header title="My title 2" />
-      <Header title="My title 4" />
-    </>
+    <div id="app">
+      <aside>
+        <strong>Cadastrar</strong>
+        <DevForm onSubmit={handleAddDev} />
+      </aside>
+
+      <main>
+        <ul>
+          {devs.map(dev => (
+            <DevItem key={dev._id} dev={dev} />
+          ))}
+        </ul>
+      </main>
+    </div>
   );
 }
 
